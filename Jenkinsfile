@@ -1,48 +1,74 @@
 pipeline {
     agent any
+
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Checking out source code from GitHub...'
                 checkout scm
             }
         }
-        stage('Build') {
+
+        stage('Setup Python Environment') {
             steps {
-                echo 'Building the Java application with Maven...'
-                bat 'mvn clean compile'
+                echo 'Setting up Python virtual environment...'
+                sh '''
+                    python -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    pip install pytest pytest-html pytest-cov
+                '''
             }
         }
+
+        stage('Build / Compile Check') {
+            steps {
+                echo 'Checking Python syntax...'
+                sh '''
+                    . venv/bin/activate
+                    python -m py_compile app.py
+                '''
+            }
+        }
+
         stage('Unit Test') {
             steps {
-                echo 'Running unit tests...'
-                bat 'mvn test'
+                echo 'Running unit tests with pytest...'
+                sh '''
+                    . venv/bin/activate
+                    mkdir -p test-reports
+                    pytest test.py \
+                      --junitxml=test-reports/results.xml \
+                      --html=test-reports/report.html \
+                      --self-contained-html
+                '''
             }
             post {
                 always {
                     echo 'Archiving test results...'
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-        stage('Package') {
-            steps {
-                echo 'Packaging the application...'
-                bat 'mvn package -DskipTests'
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                    junit 'test-reports/results.xml'
+
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'test-reports',
+                        reportFiles: 'report.html',
+                        reportName: 'Pytest HTML Report'
+                    ])
                 }
             }
         }
     }
+
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Python CI Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Check the logs for details.'
+            echo 'Python CI Pipeline failed. Check logs.'
         }
     }
 }
