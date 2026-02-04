@@ -1,74 +1,56 @@
 pipeline {
     agent any
 
+    environment {
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'
+        MVN_CMD   = 'C:\\Program Files\\Apache\\Maven\\bin\\mvn.cmd'
+    }
+
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                echo 'Checking out source code from GitHub...'
                 checkout scm
             }
         }
 
-        stage('Setup Python Environment') {
+        stage('Check Java Version') {
             steps {
-                echo 'Setting up Python virtual environment...'
-                sh '''
-                    python -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest pytest-html pytest-cov
-                '''
+                bat "\"%JAVA_HOME%\\bin\\java.exe\" -version"
             }
         }
 
-        stage('Build / Compile Check') {
+        stage('Check Maven Version') {
             steps {
-                echo 'Checking Python syntax...'
-                sh '''
-                    . venv/bin/activate
-                    python -m py_compile app.py
-                '''
+                bat "\"%MVN_CMD%\" -version"
             }
         }
 
-        stage('Unit Test') {
+        stage('Build') {
             steps {
-                echo 'Running unit tests with pytest...'
-                sh '''
-                    . venv/bin/activate
-                    mkdir -p test-reports
-                    pytest test.py \
-                      --junitxml=test-reports/results.xml \
-                      --html=test-reports/report.html \
-                      --self-contained-html
-                '''
+                bat "\"%MVN_CMD%\" clean compile"
             }
-            post {
-                always {
-                    echo 'Archiving test results...'
-                    junit 'test-reports/results.xml'
+        }
 
-                    publishHTML(target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'test-reports',
-                        reportFiles: 'report.html',
-                        reportName: 'Pytest HTML Report'
-                    ])
-                }
+        stage('Run Tests') {
+            steps {
+                bat "\"%MVN_CMD%\" test"
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat "\"%MVN_CMD%\" package"
             }
         }
     }
 
     post {
         success {
-            echo 'Python CI Pipeline completed successfully!'
+            echo '✅ Java 21 CI Pipeline SUCCESS'
         }
         failure {
-            echo 'Python CI Pipeline failed. Check logs.'
+            echo '❌ Java 21 CI Pipeline FAILED'
         }
     }
 }
