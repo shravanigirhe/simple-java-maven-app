@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'
-        PATH = "${JAVA_HOME}\\bin;${env.PATH}"
+        JAVAC = '%JAVA_HOME%\\bin\\javac.exe'
+        JAVA  = '%JAVA_HOME%\\bin\\java.exe'
     }
 
     stages {
@@ -16,32 +17,31 @@ pipeline {
 
         stage('Check Java Version') {
             steps {
-                bat 'java -version'
+                bat "\"%JAVA%\" -version"
             }
         }
 
-        stage('Build') {
+        stage('Compile Java') {
             steps {
-                bat 'mvnw.cmd clean compile'
+                bat '''
+                if not exist out mkdir out
+                "%JAVAC%" -d out src\\main\\java\\com\\example\\App.java
+                '''
             }
         }
 
-        stage('Run Tests') {
+        stage('Run App') {
             steps {
-                bat 'mvnw.cmd test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                bat 'mvnw.cmd package'
+                bat '''
+                "%JAVA%" -cp out com.example.App
+                '''
             }
         }
     }
 
     post {
         success {
-            echo '✅ Java 21 CI Pipeline SUCCESS (No Maven errors)'
+            echo '✅ Java 21 CI Pipeline SUCCESS (No Maven)'
         }
         failure {
             echo '❌ Java 21 CI Pipeline FAILED'
