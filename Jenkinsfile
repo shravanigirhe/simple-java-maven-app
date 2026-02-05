@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'
-        MVN_CMD   = 'C:\\Program Files\\Apache\\Maven\\bin\\mvn.cmd'
+        JAVA_HOME  = "C:\\Program Files\\Java\\jdk-21.0.10"
+        MAVEN_HOME = "C:\\apache-maven-3.9.6"
+        PATH = "${env.JAVA_HOME}\\bin;${env.MAVEN_HOME}\\bin;${env.PATH}"
     }
 
     stages {
@@ -16,41 +17,41 @@ pipeline {
 
         stage('Check Java Version') {
             steps {
-                bat "\"%JAVA_HOME%\\bin\\java.exe\" -version"
+                bat '"%JAVA_HOME%\\bin\\java.exe" -version'
             }
         }
 
         stage('Check Maven Version') {
             steps {
-                bat "\"%MVN_CMD%\" -version"
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" -version'
             }
         }
 
         stage('Build') {
             steps {
-                bat "\"%MVN_CMD%\" clean compile"
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" clean compile'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat "\"%MVN_CMD%\" test"
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" test'
             }
         }
 
         stage('Package') {
             steps {
-                bat "\"%MVN_CMD%\" package"
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" package'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Java 21 CI Pipeline SUCCESS'
+            echo "✅ Java Maven CI Pipeline SUCCESS"
         }
         failure {
-            echo '❌ Java 21 CI Pipeline FAILED'
+            echo "❌ Java Maven CI Pipeline FAILED"
         }
     }
 }
