@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        JAVA = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin\\java.exe'
-        JAVAC = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin\\javac.exe'
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'
+        MVN_CMD   = 'C:\\Program Files\\Apache\\Maven\\bin\\mvn.cmd'
     }
 
     stages {
@@ -16,22 +16,31 @@ pipeline {
 
         stage('Check Java Version') {
             steps {
-                bat "\"%JAVA%\" -version"
+                bat "\"%JAVA_HOME%\\bin\\java.exe\" -version"
             }
         }
 
-        stage('Compile Java') {
+        stage('Check Maven Version') {
             steps {
-                bat '''
-                if not exist out mkdir out
-                "%JAVAC%" -d out src\\main\\java\\com\\example\\App.java
-                '''
+                bat "\"%MVN_CMD%\" -version"
             }
         }
 
-        stage('Run App') {
+        stage('Build') {
             steps {
-                bat "\"%JAVA%\" -cp out com.example.App"
+                bat "\"%MVN_CMD%\" clean compile"
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat "\"%MVN_CMD%\" test"
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat "\"%MVN_CMD%\" package"
             }
         }
     }
