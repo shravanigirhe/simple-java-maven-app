@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'
-        JAVAC = '%JAVA_HOME%\\bin\\javac.exe'
-        JAVA  = '%JAVA_HOME%\\bin\\java.exe'
+        JAVA = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin\\java.exe'
+        JAVAC = 'C:\\Program Files\\Java\\jdk-21.0.10\\bin\\javac.exe'
     }
 
     stages {
@@ -32,16 +31,14 @@ pipeline {
 
         stage('Run App') {
             steps {
-                bat '''
-                "%JAVA%" -cp out com.example.App
-                '''
+                bat "\"%JAVA%\" -cp out com.example.App"
             }
         }
     }
 
     post {
         success {
-            echo '✅ Java 21 CI Pipeline SUCCESS (No Maven)'
+            echo '✅ Java 21 CI Pipeline SUCCESS'
         }
         failure {
             echo '❌ Java 21 CI Pipeline FAILED'
