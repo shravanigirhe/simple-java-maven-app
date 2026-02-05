@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21.0.10'
-        MVN_CMD   = 'C:\\Program Files\\Apache\\Maven\\bin\\mvn.cmd'
+        PATH = "${JAVA_HOME}\\bin;${env.PATH}"
     }
 
     stages {
@@ -16,38 +16,32 @@ pipeline {
 
         stage('Check Java Version') {
             steps {
-                bat "\"%JAVA_HOME%\\bin\\java.exe\" -version"
-            }
-        }
-
-        stage('Check Maven Version') {
-            steps {
-                bat "\"%MVN_CMD%\" -version"
+                bat 'java -version'
             }
         }
 
         stage('Build') {
             steps {
-                bat "\"%MVN_CMD%\" clean compile"
+                bat 'mvnw.cmd clean compile'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat "\"%MVN_CMD%\" test"
+                bat 'mvnw.cmd test'
             }
         }
 
         stage('Package') {
             steps {
-                bat "\"%MVN_CMD%\" package"
+                bat 'mvnw.cmd package'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Java 21 CI Pipeline SUCCESS'
+            echo '✅ Java 21 CI Pipeline SUCCESS (No Maven errors)'
         }
         failure {
             echo '❌ Java 21 CI Pipeline FAILED'
