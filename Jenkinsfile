@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK_21'
-        maven 'Maven_3.9.9'
+        jdk 'JDK21'
+        maven 'Maven3.9'
     }
 
     stages {
@@ -47,13 +47,13 @@ pipeline {
 
     post {
         success {
-            echo '✅ Java Maven CI Pipeline SUCCESS'
+            echo 'Java Maven CI Pipeline SUCCESS'
         }
         failure {
-            echo '❌ Java Maven CI Pipeline FAILED'
+            echo 'Java Maven CI Pipeline FAILED'
         }
         always {
-            echo '📦 Pipeline execution finished'
+            echo 'Pipeline execution finished'
         }
     }
 }
