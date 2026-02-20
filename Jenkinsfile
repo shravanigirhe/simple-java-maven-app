@@ -16,31 +16,31 @@ pipeline {
 
         stage('Check Java Version') {
             steps {
-                bat 'java -version'
+                sh 'java -version'
             }
         }
 
         stage('Check Maven Version') {
             steps {
-                bat 'mvn -version'
+                sh 'mvn -version'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'mvn clean compile'
+                sh 'mvn clean compile'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                bat 'mvn package'
+                sh 'mvn package'
             }
         }
     }
